@@ -1,0 +1,68 @@
+  media-jvb-index:
+    image: owsstreaming/core:videobridge-index_dev
+    stdin_open: true
+    volumes:
+    - /sharedata:/sharedata
+    tty: true
+    links:
+    - media-prosody:media-prosody
+    labels:
+      io.rancher.container.pull_image: always
+      io.rancher.scheduler.affinity:host_label: media-streaming=true
+  media-prosody:
+    image: owsstreaming/core:prosody_dev
+    environment:
+      USER_NAME: focus
+      REMOTE_HOST_CMD: curl 169.254.169.250/2015-12-19/self/host/agent_ip
+      REMOTE_PORT: '5347'
+      SECRET_VIDEOBRIDGE: secret_videobridge
+      SECRET_FOCUS: secret_focus
+      USER_PASSWORD: '123'
+      NUMBER_VIDEOBRDIGE: '3'
+      DOMAIN_XMPP: streaming.platform.ows.asia
+    stdin_open: true
+    network_mode: host
+    tty: true
+    labels:
+      io.rancher.scheduler.affinity:host_label: media-core=true
+      io.rancher.container.dns: 'true'
+      io.rancher.sidekicks: media-jicofo
+      io.rancher.container.pull_image: always
+  media-jicofo:
+    image: owsstreaming/core:jicofo_dev
+    environment:
+      DOMAIN_XMPP: streaming.platform.ows.asia
+      PORT: '5347'
+      SECRET_FOCUS: secret_focus
+      USER_NAME: focus
+      USER_PASSWORD: '123'
+      CONSUL_HOST: ${CONSUL_HOST}
+      CONSUL_POST: ${CONSUL_POST}
+      CONSUL_SERVICE_ID: ${CONSUL_SERVICE_ID}
+      SERVER_ID: ${SERVER_ID}
+      PROSODY_CLIENT_PORT: '5280'
+      HOST: media-prosody
+    stdin_open: true
+    tty: true
+    labels:
+      io.rancher.container.pull_image: always
+      io.rancher.scheduler.affinity:host_label: media-core=true
+  media-jvb:
+    image: owsstreaming/core:videobridge_dev
+    environment:
+      PORT: '5347'
+      SECRET_VIDEOBRIDGE: secret_videobridge
+      HOST: media-prosody
+      DOMAIN_XMPP: streaming.platform.ows.asia
+    stdin_open: true
+    network_mode: host
+    volumes:
+    - /sharedata:/sharedata
+    tty: true
+    links:
+    - media-prosody:media-prosody
+    labels:
+      io.rancher.scheduler.affinity:host_label: media-streaming=true
+      io.rancher.container.dns: 'true'
+      io.rancher.sidekicks: media-jvb-index
+      io.rancher.container.pull_image: always

@@ -1,0 +1,40 @@
+.catalog:
+  name: "Media Ows"
+  version: "1.0.0"
+  description: "Streaming Media conferences By Ows.asia"
+  uuid: # Unique identifier to be used for upgrades. Please see note.
+  minimum_rancher_version: v1.2.0-pre4-rc1
+  questions: 
+    - variable: "CONSUL_HOST"
+      label: "Consul host"
+      description: "Consul host"
+      type: "string"
+      required: true
+    - variable: "CONSUL_POST"
+      label: "Consul port"
+      description: "Consul port"
+      type: "int"
+      default: 8500
+      required: false
+    - variable: "CONSUL_SERVICE_ID"
+      label: "Consul service id"
+      description: "Consul service id"
+      type: "string"
+      required: true
+    - variable: "SERVER_ID"
+      label: "server id"
+      description: "server id"
+      type: "int"
+      required: true
+media-jvb-index:
+    scale: 1
+    start_on_create: true
+  media-prosody:
+    scale: 1
+    start_on_create: true
+  media-jicofo:
+    scale: 1
+    start_on_create: true
+  media-jvb:
+    scale: 1
+    start_on_create: true
